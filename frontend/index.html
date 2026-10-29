@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SocialSpork Dashboard</title>
+  <link rel="icon" href="assets/logo-mark.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="#/overview" class="logo"><img src="assets/logo-full.png" alt="SocialSpork"></a>
+      <button class="icon-btn ghost" id="menuToggle" aria-label="Toggle menu">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+    <div class="topbar-right">
+      <div class="brand-picker">
+        <span class="brand-industry" id="brandIndustry"></span>
+        <select id="brandSelect" aria-label="Brand"></select>
+      </div>
+      <button class="icon-btn" id="fullscreenBtn" aria-label="Fullscreen">
+        <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+      </button>
+      <div class="avatar" title="SocialSpork Admin">SS</div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" id="sidebar"></nav>
+    <div class="scrim" id="scrim"></div>
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1 id="pageTitle">Overview</h1>
+          <p id="pageSub" class="muted"></p>
+        </div>
+        <div class="filters" id="filters">
+          <select id="locationSelect" aria-label="Outlet"></select>
+          <select id="platformSelect" aria-label="Platform"></select>
+          <div class="segmented" id="rangeSeg">
+            <button data-days="7">7D</button>
+            <button data-days="30" class="active">30D</button>
+            <button data-days="90">90D</button>
+          </div>
+        </div>
+      </div>
+      <div id="page"></div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
