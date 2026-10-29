@@ -1,4 +1,6 @@
+import json
 from datetime import datetime
+from pathlib import Path
 
 import httpx
 
@@ -9,20 +11,43 @@ _DEFAULT_GW = "https://api.zomato.com/merchant-gw/web"
 _WEB = "https://www.zomato.com"
 
 
+def _normalize_session(credentials: dict | list) -> dict:
+    """Accept either our session shape or a raw cookie export and return our session shape."""
+    if isinstance(credentials, dict) and "cookie" in credentials:
+        return credentials
+    if isinstance(credentials, dict) and "cookies" in credentials:
+        credentials = credentials["cookies"]
+    if isinstance(credentials, list):
+        credentials = {c["name"]: c["value"] for c in credentials}
+    if not credentials:
+        return {}
+    return {
+        "cookie": "; ".join(f"{k}={v}" for k, v in credentials.items()),
+        "csrf_token": credentials.get("csrf", ""),
+        "mx_csrf_token": credentials.get("__Host-zmxcsrft", ""),
+    }
+
+
 class ZomatoConnector(Connector):
     """Zomato merchant dashboard (session based). listing external_id = Zomato res_id.
 
-    credentials (JSON in the env var named by credentials_ref, e.g. env:ZOMATO_SESSION_BRAND1):
-      {"cookie": "<full Cookie header>", "csrf_token": "<x-zomato-csrft>", "mx_csrf_token": "<x-zomato-mx-csrf-token>"}
-    Copy these from DevTools on a logged-in merchant dashboard. Sessions expire; when
-    calls start returning 401/403 the connection needs fresh values.
+    Credentials, via platform_connections.credentials_ref, either:
+      - {"cookie": "<Cookie header>", "csrf_token": "...", "mx_csrf_token": "..."}, or
+      - a raw cookie export ({"name": "value"}, [{"name", "value"}] or {"cookies": [...]}),
+        e.g. file:/.../zomato_cookies.json kept fresh by the pipeline's zomato_refresh_session.py.
+    With no credentials_ref, falls back to ZOMATO_COOKIE_FILE from settings.
     """
 
     platform_code = "zomato"
 
     def __init__(self, credentials: dict):
-        super().__init__(credentials)
-        self.gw_url = (get_settings().zomato_base_url or _DEFAULT_GW).rstrip("/")
+        settings = get_settings()
+        if not credentials and settings.zomato_cookie_file:
+            path = Path(settings.zomato_cookie_file).expanduser()
+            if path.exists():
+                credentials = json.loads(path.read_text())
+        super().__init__(_normalize_session(credentials))
+        self.gw_url = (settings.zomato_base_url or _DEFAULT_GW).rstrip("/")
 
     def _client(self) -> httpx.Client:
         cookie = self.credentials.get("cookie")

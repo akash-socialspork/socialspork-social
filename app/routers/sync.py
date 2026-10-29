@@ -15,3 +15,6 @@ def run_review_sync(listing_id: int, db: Connection = Depends(get_db)):
         raise HTTPException(404, str(e))
     except NotImplementedError as e:
         raise HTTPException(501, str(e))
+    except (FileNotFoundError, PermissionError) as e:
+        # Missing or expired platform session: needs a refresh, not a code fix
+        raise HTTPException(503, str(e))

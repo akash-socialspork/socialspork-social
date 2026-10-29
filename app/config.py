@@ -18,6 +18,7 @@ class Settings(BaseSettings):
 
     zomato_base_url: str = ""
     zomato_api_key: str = ""
+    zomato_cookie_file: str = ""
 
     swiggy_base_url: str = ""
     swiggy_api_key: str = ""

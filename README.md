@@ -47,5 +47,16 @@ app/rollups.py      raw rows -> metric_daily KPIs
 2. Subclass `Connector` in `app/connectors/`, return the dataclasses from `base.py`.
 3. Register it in `app/connectors/__init__.py`.
 
-Credentials: set `platform_connections.credentials_ref = 'env:MY_VAR'` and put a JSON object
-in `MY_VAR` in `.env` (e.g. `{"access_token": "..."}`). Swap for a secrets manager before production.
+Credentials: set `platform_connections.credentials_ref` to
+- `env:MY_VAR` – JSON object in `MY_VAR` in `.env` (e.g. `{"access_token": "..."}`), or
+- `file:/path/to/creds.json` – JSON file re-read on every call.
+
+Swap for a secrets manager before production.
+
+### Zomato session
+
+Zomato uses the merchant-dashboard session that `restaurant-data-pipeline/scraping/zomato_refresh_session.py`
+refreshes daily into `zomato_cookies.json`. Point `ZOMATO_COOKIE_FILE` in `.env` at that file and every
+Zomato listing without its own connection uses it. CSRF headers come from the `csrf` and
+`__Host-zmxcsrft` cookies. A 503 from a sync means the file is missing or the session expired:
+re-run the refresh script.
